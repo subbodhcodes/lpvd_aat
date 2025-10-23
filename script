@@ -1,0 +1,29 @@
+set DESIGN SPI_Slave
+set RTL ./SPI_Slave.v
+set LIB ./lib/yourlib.lib
+set SDC ./constraints.sdc
+
+read_hdl $RTL
+elaborate $DESIGN
+set_top_module $DESIGN
+
+read_libs $LIB
+read_sdc $SDC
+
+# Enable low-power options
+set_db power_effort high
+set_db lp_power_optimize true
+set_db lp_insert_clock_gating true
+set_db lp_clock_gating_effort high
+set_db lp_clock_gating_style integrated
+
+synthesize -to_generic
+synthesize -to_mapped
+
+report_clock_gating > reports/${DESIGN}_cg_summary.rpt
+report_power        > reports/${DESIGN}_lowpower_power.rpt
+report_area         > reports/${DESIGN}_lowpower_area.rpt
+report_timing       > reports/${DESIGN}_lowpower_timing.rpt
+write -mapped       > outputs/${DESIGN}_lowpower.v
+
+exit
